@@ -59,12 +59,12 @@ export default function HomePage() {
     <main>
       <section className="hero-shell">
         <div className="hero-copy">
-          <span className="eyebrow">Baraholka.md</span>
-          <h1>Простая барахолка для людей и небольшого бизнеса в Молдове</h1>
-          <p>Покупайте, продавайте, сдавайте и находите услуги рядом с вами.</p>
+          <span className="eyebrow">Доска объявлений в Молдове</span>
+          <h1>Найдите нужное рядом</h1>
+          <p>Покупайте, продавайте, сдавайте и находите услуги без лишних шагов.</p>
         </div>
         <div className="search-card" aria-label="Поиск объявлений">
-          <input className="search-main" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Что ищем сегодня?" />
+          <input className="search-main" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Что ищем?" />
           <div className="search-filters">
             <select value={category} onChange={(event) => setCategory(event.target.value)}><option value="all">Все категории</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
             <select value={city} onChange={(event) => setCity(event.target.value)}><option value="all">Вся Молдова</option>{cities.map((item) => <option key={item}>{item}</option>)}</select>
@@ -74,30 +74,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section-block">
-        <div className="section-title"><div><span className="eyebrow">Быстрый старт</span><h2>Популярные категории</h2></div><button onClick={resetFilters}>Сбросить поиск</button></div>
-        <div className="popular-grid">{popular.map((id) => <button className={`popular-card ${category === id ? "active" : ""}`} key={id} onClick={() => setCategory(id)}><span>{getCategoryIcon(id)}</span><strong>{getCategoryName(id)}</strong><small>{listings.filter((listing) => listing.category === id).length} объявлений</small></button>)}</div>
+      <section className="section-block popular-section">
+        <div className="section-title"><div><span className="eyebrow">Быстрый старт</span><h2>Популярные категории</h2></div><button onClick={resetFilters}>Сбросить</button></div>
+        <div className="popular-grid">{popular.map((id) => <button className={`popular-card ${category === id ? "active" : ""}`} key={id} onClick={() => setCategory(id)}><span>{getCategoryIcon(id)}</span><strong>{getCategoryName(id)}</strong><small>{listings.filter((listing) => listing.category === id).length}</small></button>)}</div>
       </section>
 
       <section className="section-block compact-section">
         <div className="category-chips"><button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>Все</button>{categories.map((item) => <button className={category === item.id ? "active" : ""} key={item.id} onClick={() => setCategory(item.id)}>{item.icon} {item.name}</button>)}</div>
       </section>
 
-      <section className="section-block">
-        <div className="section-title listings-title"><div><span className="eyebrow">Найдено рядом</span><h2>{category === "all" ? "Свежие объявления" : getCategoryName(category)}</h2></div><div className="list-tools"><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Сначала новые</option><option value="low">Сначала дешевле</option><option value="high">Сначала дороже</option></select><button onClick={clearTests}>Очистить тестовые</button><span>{filteredListings.length}</span></div></div>
+      <section className="section-block listings-section">
+        <div className="section-title listings-title"><div><span className="eyebrow">Каталог</span><h2>{category === "all" ? "Свежие объявления" : getCategoryName(category)}</h2></div><div className="list-tools"><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Новые</option><option value="low">Дешевле</option><option value="high">Дороже</option></select><button onClick={clearTests}>Очистить тестовые</button><span>{filteredListings.length}</span></div></div>
         {!ready || filteredListings.length === 0 ? <div className="empty"><h3>Ничего не найдено</h3><p>Измените город, цену или категорию.</p></div> : <div className="listing-grid">{filteredListings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>}
       </section>
 
       <section className="section-block form-block" id="post-form">
         <div className="section-title"><div><span className="eyebrow">Продать быстро</span><h2>Подать объявление</h2></div><span className="status status-moderation">На модерации</span></div>
+        <p className="form-hint">После публикации объявление появится со статусом “На модерации”. В MVP данные сохраняются в этом браузере.</p>
         <form className="post-form" onSubmit={handleSubmit}>
-          <label>Название<input name="title" required maxLength={80} placeholder="Например, iPhone 13 128 GB" /></label>
-          <label>Категория<select name="category" required>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-          <div className="form-row"><label>Цена, EUR<input name="price" required type="number" min="0" /></label><label>Город<select name="city">{cities.map((item) => <option key={item}>{item}</option>)}</select></label></div>
-          <div className="form-row"><label>Имя продавца<input name="seller" required /></label><label>Телефон<input name="phone" required type="tel" /></label></div>
-          <div className="form-row"><label>Email<input name="email" required type="email" /></label><label>Telegram / Viber<input name="messenger" /></label></div>
-          <label>Описание<textarea name="description" required placeholder="Коротко опишите состояние, детали и условия" /></label>
-          <button className="primary-btn" type="submit">Опубликовать</button>
+          <fieldset className="form-group"><legend>1. Что продаёте</legend><label>Название<input name="title" required maxLength={80} placeholder="Например, iPhone 13 128 GB" /></label><label>Категория<select name="category" required>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label></fieldset>
+          <fieldset className="form-group"><legend>2. Цена и город</legend><div className="form-row"><label>Цена, EUR<input name="price" required type="number" min="0" /></label><label>Город<select name="city">{cities.map((item) => <option key={item}>{item}</option>)}</select></label></div></fieldset>
+          <fieldset className="form-group"><legend>3. Контакты</legend><div className="form-row"><label>Имя продавца<input name="seller" required /></label><label>Телефон<input name="phone" required type="tel" /></label></div><div className="form-row"><label>Email<input name="email" required type="email" /></label><label>Telegram / Viber<input name="messenger" /></label></div></fieldset>
+          <fieldset className="form-group"><legend>4. Описание</legend><label>Описание<textarea name="description" required placeholder="Коротко опишите состояние, детали и условия" /></label></fieldset>
+          <button className="primary-btn publish-btn" type="submit">Опубликовать</button>
         </form>
       </section>
     </main>
