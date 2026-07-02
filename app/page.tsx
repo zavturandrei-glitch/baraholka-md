@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { categories, clearUserListings, getAllListings, getCategoryName, saveUserListing } from "@/lib/listings";
+import { categories, clearUserListings, getAllListings, getCategoryIcon, getCategoryName, saveUserListing } from "@/lib/listings";
 import type { Listing } from "@/types/listing";
 
-const cities = ["Кишинев", "Бельцы", "Комрат", "Оргеев"];
+const cities = ["Кишинев", "Бельцы", "Комрат", "Оргеев", "Кагул", "Тирасполь"];
+const popular = ["transport", "realty", "phones", "computers", "home", "kids", "pets", "services"];
 
 export default function HomePage() {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -13,27 +14,27 @@ export default function HomePage() {
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("all");
+  const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("new");
 
-  useEffect(() => {
-    setListings(getAllListings());
-    setReady(true);
-  }, []);
+  useEffect(() => { setListings(getAllListings()); setReady(true); }, []);
 
   const filteredListings = useMemo(() => {
-    const price = Number(maxPrice);
+    const min = Number(minPrice);
+    const max = Number(maxPrice);
     return [...listings]
       .filter((listing) => category === "all" || listing.category === category)
       .filter((listing) => !query || `${listing.title} ${listing.description}`.toLowerCase().includes(query.toLowerCase()))
       .filter((listing) => city === "all" || listing.city === city)
-      .filter((listing) => !price || listing.price <= price)
+      .filter((listing) => !min || listing.price >= min)
+      .filter((listing) => !max || listing.price <= max)
       .sort((a, b) => sort === "low" ? a.price - b.price : sort === "high" ? b.price - a.price : b.id.localeCompare(a.id));
-  }, [category, city, listings, maxPrice, query, sort]);
+  }, [category, city, listings, maxPrice, minPrice, query, sort]);
 
-  function refresh() {
-    setListings(getAllListings());
-  }
+  function refresh() { setListings(getAllListings()); }
+  function resetFilters() { setCategory("all"); setCity("all"); setMinPrice(""); setMaxPrice(""); setQuery(""); setSort("new"); }
+  function clearTests() { clearUserListings(); resetFilters(); refresh(); }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,94 +55,62 @@ export default function HomePage() {
     refresh();
   }
 
-  function resetFilters() {
-    setCategory("all");
-    setCity("all");
-    setMaxPrice("");
-    setQuery("");
-    setSort("new");
-  }
-
-  function clearTests() {
-    clearUserListings();
-    resetFilters();
-    refresh();
-  }
-
   return (
     <main>
-      <section className="search-panel">
-        <div className="search-box">
-          <select value={category} onChange={(event) => setCategory(event.target.value)}>
-            <option value="all">Все категории</option>
-            {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-          </select>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Что ищем? Например: квартира, iPhone, работа" />
-          <button type="button">Найти</button>
+      <section className="hero-shell">
+        <div className="hero-copy">
+          <span className="eyebrow">Baraholka.md</span>
+          <h1>Простая барахолка для людей и небольшого бизнеса в Молдове</h1>
+          <p>Покупайте, продавайте, сдавайте и находите услуги рядом с вами.</p>
         </div>
-        <a className="post-btn" href="#post-form">Подать объявление</a>
+        <div className="search-card" aria-label="Поиск объявлений">
+          <input className="search-main" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Что ищем сегодня?" />
+          <div className="search-filters">
+            <select value={category} onChange={(event) => setCategory(event.target.value)}><option value="all">Все категории</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+            <select value={city} onChange={(event) => setCity(event.target.value)}><option value="all">Вся Молдова</option>{cities.map((item) => <option key={item}>{item}</option>)}</select>
+            <input value={minPrice} onChange={(event) => setMinPrice(event.target.value)} type="number" min="0" placeholder="Цена от" />
+            <input value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} type="number" min="0" placeholder="Цена до" />
+          </div>
+        </div>
       </section>
 
-      <section className="layout">
-        <aside className="categories-panel">
-          <div className="section-head"><h2>Категории</h2><span>{categories.length} разделов</span></div>
-          <div className="category-list">
-            <button className={`category-btn ${category === "all" ? "active" : ""}`} onClick={() => setCategory("all")}><span className="category-icon">*</span><span>Все категории</span><span>{listings.length}</span></button>
-            {categories.map((item) => (
-              <button className={`category-btn ${category === item.id ? "active" : ""}`} key={item.id} onClick={() => setCategory(item.id)}>
-                <span className="category-icon">{item.icon}</span><span>{item.name}</span><span>{listings.filter((listing) => listing.category === item.id).length}</span>
-              </button>
-            ))}
-          </div>
-        </aside>
+      <section className="section-block">
+        <div className="section-title"><div><span className="eyebrow">Быстрый старт</span><h2>Популярные категории</h2></div><button onClick={resetFilters}>Сбросить поиск</button></div>
+        <div className="popular-grid">{popular.map((id) => <button className={`popular-card ${category === id ? "active" : ""}`} key={id} onClick={() => setCategory(id)}><span>{getCategoryIcon(id)}</span><strong>{getCategoryName(id)}</strong><small>{listings.filter((listing) => listing.category === id).length} объявлений</small></button>)}</div>
+      </section>
 
-        <section className="content">
-          <div className="hero">
-            <div><p>Baraholka.md</p><h1>Простая барахолка для людей и небольшого бизнеса в Молдове</h1></div>
-            <button onClick={resetFilters}>Смотреть все</button>
-          </div>
+      <section className="section-block compact-section">
+        <div className="category-chips"><button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>Все</button>{categories.map((item) => <button className={category === item.id ? "active" : ""} key={item.id} onClick={() => setCategory(item.id)}>{item.icon} {item.name}</button>)}</div>
+      </section>
 
-          <div className="filters">
-            <label>Город<select value={city} onChange={(event) => setCity(event.target.value)}><option value="all">Все города</option>{cities.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label>Цена до<input value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} type="number" min="0" placeholder="Любая" /></label>
-            <label>Сортировка<select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Сначала новые</option><option value="low">Сначала дешевле</option><option value="high">Сначала дороже</option></select></label>
-          </div>
+      <section className="section-block">
+        <div className="section-title listings-title"><div><span className="eyebrow">Найдено рядом</span><h2>{category === "all" ? "Свежие объявления" : getCategoryName(category)}</h2></div><div className="list-tools"><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="new">Сначала новые</option><option value="low">Сначала дешевле</option><option value="high">Сначала дороже</option></select><button onClick={clearTests}>Очистить тестовые</button><span>{filteredListings.length}</span></div></div>
+        {!ready || filteredListings.length === 0 ? <div className="empty"><h3>Ничего не найдено</h3><p>Измените город, цену или категорию.</p></div> : <div className="listing-grid">{filteredListings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>}
+      </section>
 
-          <div className="section-head listings-head"><h2>{category === "all" ? "Объявления" : getCategoryName(category)}</h2><div className="list-tools"><button className="ghost-btn clear-btn" onClick={clearTests}>Очистить мои тестовые объявления</button><span>{filteredListings.length} найдено</span></div></div>
-          {!ready || filteredListings.length === 0 ? <div className="empty"><h3>Ничего не найдено</h3><p>Попробуйте другой запрос, город или категорию.</p></div> : <ListingGrid listings={filteredListings} />}
-
-          <form id="post-form" className="post-form" onSubmit={handleSubmit}>
-            <div className="section-head"><h2>Подать объявление</h2><span>Статус: На модерации</span></div>
-            <label>Название<input name="title" required maxLength={80} placeholder="Например, iPhone 14 Pro 128 GB" /></label>
-            <label>Категория<select name="category" required>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-            <div className="form-row"><label>Цена, EUR<input name="price" required type="number" min="0" /></label><label>Город<select name="city">{cities.map((item) => <option key={item}>{item}</option>)}</select></label></div>
-            <div className="form-row"><label>Имя продавца<input name="seller" required /></label><label>Телефон<input name="phone" required type="tel" /></label></div>
-            <div className="form-row"><label>Email<input name="email" required type="email" /></label><label>Telegram / Viber<input name="messenger" /></label></div>
-            <label>Описание<textarea name="description" required /></label>
-            <button className="post-btn" type="submit">Опубликовать</button>
-          </form>
-        </section>
+      <section className="section-block form-block" id="post-form">
+        <div className="section-title"><div><span className="eyebrow">Продать быстро</span><h2>Подать объявление</h2></div><span className="status status-moderation">На модерации</span></div>
+        <form className="post-form" onSubmit={handleSubmit}>
+          <label>Название<input name="title" required maxLength={80} placeholder="Например, iPhone 13 128 GB" /></label>
+          <label>Категория<select name="category" required>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+          <div className="form-row"><label>Цена, EUR<input name="price" required type="number" min="0" /></label><label>Город<select name="city">{cities.map((item) => <option key={item}>{item}</option>)}</select></label></div>
+          <div className="form-row"><label>Имя продавца<input name="seller" required /></label><label>Телефон<input name="phone" required type="tel" /></label></div>
+          <div className="form-row"><label>Email<input name="email" required type="email" /></label><label>Telegram / Viber<input name="messenger" /></label></div>
+          <label>Описание<textarea name="description" required placeholder="Коротко опишите состояние, детали и условия" /></label>
+          <button className="primary-btn" type="submit">Опубликовать</button>
+        </form>
       </section>
     </main>
   );
 }
 
-function ListingGrid({ listings }: { listings: Listing[] }) {
-  return <div className="listing-grid">{listings.map((listing) => <ListingCard key={listing.id} listing={listing} />)}</div>;
-}
-
 function ListingCard({ listing }: { listing: Listing }) {
   const [phoneShown, setPhoneShown] = useState(false);
+  const statusClass = listing.status === "Активное" ? "status-active" : listing.status === "Отклонено" ? "status-rejected" : "status-moderation";
   return (
     <article className="listing-card">
-      <div className="card-image">{getCategoryName(listing.category).slice(0, 1)}</div>
-      <div className="card-body">
-        <h3 className="card-title">{listing.title}</h3>
-        <p className="card-price">{listing.price.toLocaleString("ru-RU")} EUR</p>
-        <div className="card-meta"><span>Город: <strong>{listing.city}</strong></span><span>Продавец: <strong>{listing.seller}</strong></span><span>{listing.date}</span></div>
-        <div className="card-badges"><span className="badge">{listing.badge}</span><span className={`status ${listing.status === "Активное" ? "status-active" : listing.status === "Отклонено" ? "status-rejected" : "status-moderation"}`}>{listing.status}</span></div>
-        <div className="card-actions"><button className="card-action" onClick={() => setPhoneShown(true)}>{phoneShown ? listing.phone : "Показать телефон"}</button><Link className="card-action primary" href={`/listings/${listing.id}`}>Подробнее</Link></div>
-      </div>
+      <div className="media-wrap"><img src={listing.image} alt={listing.title} loading="lazy" /><button className="favorite-btn" aria-label="Добавить в избранное">♡</button><span className="category-badge">{getCategoryIcon(listing.category)} {getCategoryName(listing.category)}</span></div>
+      <div className="card-body"><div className="price-row"><strong>{listing.price.toLocaleString("ru-RU")} EUR</strong><span>{listing.condition}</span></div><h3>{listing.title}</h3><p>{listing.description}</p><div className="meta-row"><span>{listing.city}</span><span>{listing.date}</span></div><span className={`status ${statusClass}`}>{listing.status}</span><div className="card-actions"><button onClick={() => setPhoneShown(true)}>{phoneShown ? listing.phone : "Показать телефон"}</button><Link href={`/listings/${listing.id}`}>Подробнее</Link></div></div>
     </article>
   );
 }

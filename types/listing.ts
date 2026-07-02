@@ -1,5 +1,7 @@
 export type ListingStatus = "На модерации" | "Активное" | "Отклонено";
 
+export type ListingCondition = "Новое" | "Отличное" | "Хорошее" | "Б/у" | "Услуга" | "Работа";
+
 export type Listing = {
   id: string;
   title: string;
@@ -14,6 +16,8 @@ export type Listing = {
   date: string;
   badge: string;
   status: ListingStatus;
+  condition: ListingCondition;
+  image: string;
   isUserListing?: boolean;
 };
 
