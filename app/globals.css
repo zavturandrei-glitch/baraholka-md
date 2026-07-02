@@ -139,6 +139,12 @@ label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; font-weig
 .admin-actions button { min-height: 36px; border: 1px solid var(--line); border-radius: 999px; background: #fff; padding: 0 11px; font-size: 13px; font-weight: 900; color: var(--graphite); }
 .admin-actions button:hover { border-color: rgba(201,24,90,.28); background: #fff7fa; }
 .danger-action { color: var(--danger) !important; background: #fff4f2 !important; }
+.admin-error, .admin-notice, .admin-warning, .admin-empty { border-radius: 14px; padding: 12px 14px; font-weight: 800; }
+.admin-error { color: #b42318; background: #fff1ef; border: 1px solid rgba(180,35,24,.2); }
+.admin-notice { color: #146c43; background: #ecfdf3; border: 1px solid rgba(20,108,67,.18); }
+.admin-warning { display: inline-block; margin-top: 10px; color: #8a4b00 !important; background: #fff6d8; border: 1px solid rgba(234,179,8,.35); }
+.admin-empty { color: var(--muted); background: #fff; border: 1px solid var(--line); }
+.admin-actions button:disabled { cursor: wait; opacity: .55; }
 .login-card { max-width: 620px; margin: 40px auto; padding: 26px; text-align: center; }
 .login-card h1 { font-size: clamp(30px, 5vw, 46px); }
 .login-text { color: var(--muted); line-height: 1.55; }

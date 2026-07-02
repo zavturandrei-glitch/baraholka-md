@@ -97,6 +97,39 @@ export async function fetchListings() {
   return data.length ? (data as DbListing[]).map(mapDbListing) : getLocalListings();
 }
 
+export async function fetchAdminListings() {
+  if (!isSupabaseConfigured || !supabase) return getLocalListings();
+  const { data, error } = await supabase.from("listings").select("*").order("created_at", { ascending: false });
+  if (error) throw new Error(`Не удалось загрузить объявления из Supabase: ${error.message}`);
+  return (data as DbListing[]).map(mapDbListing);
+}
+
+export async function updateAdminListingStatus(id: string, status: ListingStatus) {
+  if (!isSupabaseConfigured || !supabase) {
+    setListingStatus(id, status);
+    return;
+  }
+  if (id.startsWith("demo-")) {
+    setListingStatus(id, status);
+    return;
+  }
+  const { error } = await supabase.from("listings").update({ status }).eq("id", id);
+  if (error) throw new Error(`Не удалось изменить статус объявления: ${error.message}`);
+}
+
+export async function deleteAdminListing(id: string) {
+  if (!isSupabaseConfigured || !supabase) {
+    deleteListing(id);
+    return;
+  }
+  if (id.startsWith("demo-")) {
+    deleteListing(id);
+    return;
+  }
+  const { error } = await supabase.from("listings").delete().eq("id", id);
+  if (error) throw new Error(`Не удалось удалить объявление: ${error.message}`);
+}
+
 async function uploadListingPhoto(userId: string, file?: File | null) {
   if (!file || !supabase) return FALLBACK_IMAGE;
   const extension = file.name.split(".").pop() || "jpg";
