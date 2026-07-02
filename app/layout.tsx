@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <nav className="top-actions" aria-label="Навигация">
             <a href="/">Объявления</a>
             <a href="/admin">Админка</a>
-            <button type="button">Войти</button>
+            <a href="/login">Войти</a>
           </nav>
         </header>
         {children}
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <p>Простая доска объявлений для покупки, продажи и услуг по Молдове.</p>
           </div>
           <div><a href="/">О проекте</a><a href="/admin">Модерация</a><a href="/">Правила</a></div>
-          <div><a href="/">Помощь</a><a href="/">Контакты</a><a href="/">Для бизнеса</a></div>
+          <div><a href="/">Помощь</a><a href="/login">Войти</a><a href="/">Для бизнеса</a></div>
         </footer>
       </body>
     </html>
