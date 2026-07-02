@@ -18,8 +18,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <nav className="top-actions" aria-label="Навигация">
             <a className="nav-link optional-link" href="/admin">Админка</a>
             <a className="nav-link" href="/login">Войти</a>
-            <a className="nav-link optional-link" href="/login">Мои объявления</a>
-            <a className="nav-link optional-link" href="/login">Избранное</a>
+            <a className="nav-link optional-link" href="/account">Мои объявления</a>
+            <a className="nav-link optional-link" href="/account">Избранное</a>
             <a className="post-link" href="/#post-form">Подать объявление</a>
           </nav>
         </header>

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { getAllListings, getCategoryIcon, getCategoryName } from "@/lib/listings";
+import { fetchListings, getCategoryIcon, getCategoryName } from "@/lib/listings";
 import type { Listing } from "@/types/listing";
 
 export default function ListingPage({ params }: { params: { id: string } }) {
   const [listings, setListings] = useState<Listing[]>([]);
   const [phoneShown, setPhoneShown] = useState(false);
 
-  useEffect(() => { setListings(getAllListings()); }, []);
+  useEffect(() => { fetchListings().then(setListings); }, []);
 
   const listing = listings.find((item) => item.id === params.id);
   const related = useMemo(() => listing ? listings.filter((item) => item.category === listing.category && item.id !== listing.id).slice(0, 3) : [], [listing, listings]);

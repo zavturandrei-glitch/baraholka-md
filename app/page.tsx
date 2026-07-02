@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { categories, clearUserListings, getAllListings, getCategoryIcon, getCategoryName, saveUserListing } from "@/lib/listings";
+import { categories, clearUserListings, fetchListings, getCategoryIcon, getCategoryName, saveListing } from "@/lib/listings";
 import type { Listing } from "@/types/listing";
 
 const cities = ["Кишинев", "Бельцы", "Комрат", "Оргеев", "Кагул", "Тирасполь"];
@@ -18,7 +18,7 @@ export default function HomePage() {
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("new");
 
-  useEffect(() => { setListings(getAllListings()); setReady(true); }, []);
+  useEffect(() => { fetchListings().then(setListings).finally(() => setReady(true)); }, []);
 
   const filteredListings = useMemo(() => {
     const min = Number(minPrice);
@@ -32,29 +32,35 @@ export default function HomePage() {
       .sort((a, b) => sort === "low" ? a.price - b.price : sort === "high" ? b.price - a.price : b.id.localeCompare(a.id));
   }, [category, city, listings, maxPrice, minPrice, query, sort]);
 
-  function refresh() { setListings(getAllListings()); }
+  async function refresh() { setListings(await fetchListings()); }
   function resetFilters() { setCategory("all"); setCity("all"); setMinPrice(""); setMaxPrice(""); setQuery(""); setSort("new"); }
   function clearTests() { clearUserListings(); resetFilters(); refresh(); }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const newListing = saveUserListing({
-      title: String(form.get("title")),
-      category: String(form.get("category")),
-      price: Number(form.get("price")),
-      city: String(form.get("city")),
-      seller: String(form.get("seller")),
-      phone: String(form.get("phone")),
-      email: String(form.get("email")),
-      messenger: String(form.get("messenger") || "Не указан"),
-      description: String(form.get("description"))
-    });
-    event.currentTarget.reset();
-    setCategory(newListing.category);
-    refresh();
-  }
+    const imageFile = form.get("photo") instanceof File ? (form.get("photo") as File) : null;
 
+    try {
+      const newListing = await saveListing({
+        title: String(form.get("title")),
+        category: String(form.get("category")),
+        price: Number(form.get("price")),
+        city: String(form.get("city")),
+        seller: String(form.get("seller")),
+        phone: String(form.get("phone")),
+        email: String(form.get("email")),
+        messenger: String(form.get("messenger") || "Не указан"),
+        description: String(form.get("description"))
+      }, imageFile);
+
+      event.currentTarget.reset();
+      setCategory(newListing.category);
+      await refresh();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Не удалось опубликовать объявление");
+    }
+  }
   return (
     <main>
       <section className="hero-shell">
@@ -92,7 +98,7 @@ export default function HomePage() {
         <div className="section-title"><div><span className="eyebrow">Продать быстро</span><h2>Подать объявление</h2></div><span className="status status-moderation">На модерации</span></div>
         <p className="form-hint">После публикации объявление появится со статусом “На модерации”. В MVP данные сохраняются в этом браузере.</p>
         <form className="post-form" onSubmit={handleSubmit}>
-          <fieldset className="form-group"><legend>1. Что продаёте</legend><label>Название<input name="title" required maxLength={80} placeholder="Например, iPhone 13 128 GB" /></label><label>Категория<select name="category" required>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label></fieldset>
+          <fieldset className="form-group"><legend>1. Что продаёте</legend><label>Название<input name="title" required maxLength={80} placeholder="Например, iPhone 13 128 GB" /></label><label>Категория<select name="category" required>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Фото<input name="photo" type="file" accept="image/*" /></label></fieldset>
           <fieldset className="form-group"><legend>2. Цена и город</legend><div className="form-row"><label>Цена, EUR<input name="price" required type="number" min="0" /></label><label>Город<select name="city">{cities.map((item) => <option key={item}>{item}</option>)}</select></label></div></fieldset>
           <fieldset className="form-group"><legend>3. Контакты</legend><div className="form-row"><label>Имя продавца<input name="seller" required /></label><label>Телефон<input name="phone" required type="tel" /></label></div><div className="form-row"><label>Email<input name="email" required type="email" /></label><label>Telegram / Viber<input name="messenger" /></label></div></fieldset>
           <fieldset className="form-group"><legend>4. Описание</legend><label>Описание<textarea name="description" required placeholder="Коротко опишите состояние, детали и условия" /></label></fieldset>
