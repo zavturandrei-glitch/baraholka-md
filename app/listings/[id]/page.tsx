@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { fetchListings, getCategoryIcon, getCategoryName } from "@/lib/listings";
 import { getListingBrand, getListingImages, getListingViews, readStringList, toggleFavorite, FAVORITES_KEY } from "@/lib/marketplace";
+import { createLocalReport, getQualitySignals, reportReasons } from "@/lib/moderation";
 import type { Listing } from "@/types/listing";
 
 export default function ListingPage({ params }: { params: { id: string } }) {
@@ -11,6 +12,9 @@ export default function ListingPage({ params }: { params: { id: string } }) {
   const [phoneShown, setPhoneShown] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState(reportReasons[0]);
+  const [reportDetails, setReportDetails] = useState("");
   const [views, setViews] = useState(0);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
@@ -41,6 +45,7 @@ export default function ListingPage({ params }: { params: { id: string } }) {
 
   const currentListing = listing;
   const images = getListingImages(currentListing);
+  const quality = getQualitySignals(currentListing);
   const statusClass = currentListing.status === "Активное" ? "status-active" : currentListing.status === "Отклонено" ? "status-rejected" : "status-moderation";
   const isFavorite = favoriteIds.includes(currentListing.id);
   const characteristics = [
@@ -48,7 +53,8 @@ export default function ListingPage({ params }: { params: { id: string } }) {
     ["Состояние", currentListing.condition],
     ["Бренд", getListingBrand(currentListing)],
     ["Город", currentListing.city],
-    ["Дата", currentListing.date],
+    ["Дата публикации", currentListing.date],
+    ["Обновлено", currentListing.date],
     ["Статус", currentListing.status],
     ["Просмотры", String(views)]
   ];
@@ -68,20 +74,22 @@ export default function ListingPage({ params }: { params: { id: string } }) {
     }
   }
 
-  function handleReport() {
-    setNotice("Жалоба сохранена для MVP. На следующем этапе подключим таблицу reports.");
+  function submitReport() {
+    createLocalReport(currentListing, reportReason, reportDetails);
+    setReportOpen(false);
+    setReportDetails("");
+    setNotice("Жалоба отправлена модераторам. Спасибо, что помогаете делать площадку безопаснее.");
   }
 
   return (
     <main className="page-narrow">
       <Link className="back-link" href="/">← Назад к объявлениям</Link>
-
       {notice && <p className="admin-notice">{notice}</p>}
 
       <article className="product-page product-page-pro">
         <section className="gallery-card product-gallery">
           <button className="gallery-main" onClick={() => setLightboxOpen(true)} aria-label="Открыть фото на весь экран">
-            <img src={images[selectedImage]} alt={listing.title} />
+            <img src={images[selectedImage]} alt={currentListing.title} />
           </button>
           <div className="gallery-strip">
             {images.map((image, index) => (
@@ -93,27 +101,28 @@ export default function ListingPage({ params }: { params: { id: string } }) {
         </section>
 
         <aside className="product-side contact-panel">
-          <span className="category-badge">{getCategoryIcon(listing.category)} {getCategoryName(listing.category)}</span>
-          <h1>{listing.title}</h1>
-          <div className="product-price">{listing.price.toLocaleString("ru-RU")} EUR</div>
+          <div className="trust-badge">Проверено модератором</div>
+          <span className="category-badge">{getCategoryIcon(currentListing.category)} {getCategoryName(currentListing.category)}</span>
+          <h1>{currentListing.title}</h1>
+          <div className="product-price">{currentListing.price.toLocaleString("ru-RU")} EUR</div>
           <div className="product-actions">
             <button onClick={handleFavorite}>{isFavorite ? "В избранном" : "Добавить в избранное"}</button>
             <button onClick={handleShare}>Поделиться</button>
-            <button onClick={handleReport}>Пожаловаться</button>
+            <button onClick={() => setReportOpen(true)}>Пожаловаться</button>
           </div>
           <div className="seller-card seller-card-pro">
             <span>Продавец</span>
-            <strong>{listing.seller}</strong>
-            <p>{listing.city} · опубликовано {listing.date}</p>
-            <button className="primary-btn" onClick={() => setPhoneShown(true)}>{phoneShown ? listing.phone : "Показать телефон"}</button>
-            <a className="contact-link" href={`mailto:${listing.email}`}>Написать на email</a>
-            <span className="messenger-line">{listing.messenger}</span>
+            <strong>{currentListing.seller}</strong>
+            <p>{currentListing.city} · опубликовано {currentListing.date} · {views} просмотров</p>
+            <button className="primary-btn" onClick={() => setPhoneShown(true)}>{phoneShown ? currentListing.phone : "Показать телефон"}</button>
+            <a className="contact-link" href={`mailto:${currentListing.email}`}>Написать на email</a>
+            <span className="messenger-line">{currentListing.messenger}</span>
           </div>
         </aside>
 
         <section className="description-card">
           <h2>Описание</h2>
-          <p>{listing.description}</p>
+          <p>{currentListing.description}</p>
         </section>
 
         <section className="description-card specs-card">
@@ -127,15 +136,19 @@ export default function ListingPage({ params }: { params: { id: string } }) {
             ))}
           </div>
         </section>
+
+        <section className="description-card safety-card">
+          <h2>Безопасная сделка</h2>
+          <div className="safety-grid">
+            <div><strong>Качество объявления: {quality.score}%</strong><p>Проверяем фото, цену, контакты и полноту описания.</p></div>
+            <div><strong>Не переводите предоплату</strong><p>Встречайтесь в безопасном месте и проверяйте товар до оплаты.</p></div>
+            <div><strong>Сообщайте о подозрениях</strong><p>Жалобы попадают в админку и помогают быстрее убирать рискованные объявления.</p></div>
+          </div>
+        </section>
       </article>
 
       <section className="section-block">
-        <div className="section-title">
-          <div>
-            <span className="eyebrow">Похожие</span>
-            <h2>Еще в этой категории</h2>
-          </div>
-        </div>
+        <div className="section-title"><div><span className="eyebrow">Похожие</span><h2>Еще в этой категории</h2></div></div>
         <div className="related-grid">
           {related.map((item) => (
             <Link className="related-card" href={`/listings/${item.id}`} key={item.id}>
@@ -150,13 +163,26 @@ export default function ListingPage({ params }: { params: { id: string } }) {
       {lightboxOpen && (
         <div className="lightbox" role="dialog" aria-modal="true">
           <button className="lightbox-close" onClick={() => setLightboxOpen(false)}>Закрыть</button>
-          <img src={images[selectedImage]} alt={listing.title} />
+          <img src={images[selectedImage]} alt={currentListing.title} />
           <div className="lightbox-thumbs">
             {images.map((image, index) => (
               <button className={selectedImage === index ? "active" : ""} key={`${image}-lightbox-${index}`} onClick={() => setSelectedImage(index)}>
                 <img src={image} alt="" />
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {reportOpen && (
+        <div className="admin-modal" role="dialog" aria-modal="true">
+          <div className="admin-modal-card narrow">
+            <button className="modal-close" onClick={() => setReportOpen(false)}>Закрыть</button>
+            <h2>Пожаловаться на объявление</h2>
+            <p>{currentListing.title}</p>
+            <label>Причина<select value={reportReason} onChange={(event) => setReportReason(event.target.value)}>{reportReasons.map((reason) => <option key={reason}>{reason}</option>)}</select></label>
+            <label>Комментарий<textarea value={reportDetails} onChange={(event) => setReportDetails(event.target.value)} placeholder="Опишите, что не так" /></label>
+            <button className="primary-btn" onClick={submitReport}>Отправить жалобу</button>
           </div>
         </div>
       )}

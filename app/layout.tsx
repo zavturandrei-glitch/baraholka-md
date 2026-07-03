@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   keywords: ["Baraholka.md", "объявления Молдова", "доска объявлений", "Кишинев", "купить", "продать"],
   openGraph: {
     title: "Baraholka.md - доска объявлений в Молдове",
-    description: "Простая и современная барахолка для людей и небольшого бизнеса в Молдове.",
+    description: "Современный marketplace объявлений для людей и бизнеса в Молдове.",
     url: "https://baraholka-md.vercel.app",
     siteName: "Baraholka.md",
     locale: "ru_MD",
@@ -27,31 +27,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru">
       <body>
-        <header className="topbar">
+        <header className="topbar marketplace-header">
           <a className="brand" href="/" aria-label="Baraholka.md">
             <span>B</span>
             <strong>Baraholka.md</strong>
           </a>
+          <form className="header-search" action="/">
+            <label className="sr-only" htmlFor="header-search-input">Поиск объявлений</label>
+            <input id="header-search-input" name="q" placeholder="Что вы хотите найти?" />
+            <button type="submit" aria-label="Найти">⌕</button>
+          </form>
           <nav className="top-actions" aria-label="Навигация">
-            <a className="nav-link optional-link" href="/categories/transport">Категории</a>
-            <a className="nav-link optional-link" href="/admin">Админка</a>
-            <a className="nav-link" href="/login">Войти</a>
-            <a className="nav-link optional-link" href="/account">Мои объявления</a>
             <a className="nav-link optional-link" href="/account">Избранное</a>
+            <a className="nav-link optional-link" href="/account">Сообщения</a>
+            <a className="nav-link" href="/login">Войти</a>
             <a className="post-link" href="/#post-form">Подать объявление</a>
           </nav>
         </header>
         {children}
-        <footer className="site-footer">
+        <footer className="site-footer marketplace-footer">
           <div>
             <strong>Baraholka.md</strong>
-            <p>Современная доска объявлений для Молдовы: вещи, услуги, работа, недвижимость и транспорт.</p>
+            <p>Маркетплейс объявлений для Молдовы: транспорт, недвижимость, работа, услуги и вещи рядом с вами.</p>
           </div>
           <nav aria-label="Нижняя навигация">
             <a href="/">Главная</a>
+            <a href="/categories/transport">Категории</a>
             <a href="/account">Кабинет</a>
-            <a href="/login">Войти</a>
-            <a href="/admin">Админка MVP</a>
+            <a href="/admin">Админка</a>
           </nav>
         </footer>
       </body>

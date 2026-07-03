@@ -852,6 +852,448 @@ label {
 input[type="file"] { padding: 9px; }
 @media (max-width: 760px) { .account-head, .account-grid { display: grid; grid-template-columns: 1fr; } .account-actions { justify-content: stretch; } .account-actions > * { flex: 1; } }
 
+/* Product-level marketplace homepage */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body {
+  background: #f6f7f9;
+}
+
+.marketplace-header {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: auto minmax(260px, 620px) auto;
+  gap: 18px;
+  background: rgba(255,255,255,.96);
+  border-bottom: 1px solid #e8eaef;
+}
+
+.header-search {
+  display: grid;
+  grid-template-columns: 1fr 42px;
+  align-items: center;
+  min-height: 46px;
+  border: 1px solid #e3e5ea;
+  border-radius: 999px;
+  background: #f8f9fb;
+  padding: 0 4px 0 16px;
+}
+
+.header-search:focus-within {
+  border-color: rgba(201,24,90,.38);
+  box-shadow: 0 0 0 4px rgba(201,24,90,.08);
+}
+
+.header-search input {
+  min-height: 42px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-weight: 800;
+}
+
+.header-search button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.market-home {
+  width: min(1240px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 14px 0 28px;
+}
+
+.market-search {
+  padding: 14px;
+  border: 1px solid #e5e7ec;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(18, 18, 23, .07);
+}
+
+.market-search-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.4fr) minmax(160px, .8fr) minmax(160px, .8fr) minmax(110px, .5fr) minmax(110px, .5fr) 120px;
+  gap: 8px;
+}
+
+.market-search-grid label {
+  display: grid;
+  gap: 5px;
+}
+
+.market-search-grid label span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.market-search-grid input,
+.market-search-grid select {
+  min-height: 44px;
+  border-radius: 12px;
+  background: #f8f9fb;
+}
+
+.market-search-grid button {
+  align-self: end;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 950;
+}
+
+.market-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.market-tags button {
+  min-height: 32px;
+  border: 1px solid #e5e7ec;
+  border-radius: 999px;
+  background: #fff;
+  padding: 0 12px;
+  color: #34323a;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.market-tags button:hover {
+  border-color: rgba(201,24,90,.28);
+  background: #fff7fa;
+}
+
+.market-section {
+  margin-top: 20px;
+}
+
+.market-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.market-section-head h2 {
+  margin: 0;
+  font-size: 23px;
+  letter-spacing: 0;
+}
+
+.market-section-head a,
+.market-section-head span {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.market-category-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.market-category {
+  min-height: 82px;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  border: 1px solid #e5e7ec;
+  border-radius: 16px;
+  background: #fff;
+  text-align: center;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+
+.market-category:hover {
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(201,24,90,.24);
+  box-shadow: 0 14px 30px rgba(18,18,23,.08);
+}
+
+.market-category span {
+  font-size: 24px;
+}
+
+.market-category strong {
+  max-width: 92%;
+  color: #201f25;
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+.market-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.market-card {
+  overflow: hidden;
+  border: 1px solid #e5e7ec;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(18,18,23,.05);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.market-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201,24,90,.18);
+  box-shadow: 0 20px 46px rgba(18,18,23,.12);
+}
+
+.market-card-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 1.32 / 1;
+  background: #eef0f3;
+}
+
+.market-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .24s ease;
+}
+
+.market-card:hover .market-card-media img {
+  transform: scale(1.035);
+}
+
+.market-card-media button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.94);
+  color: var(--brand);
+  font-size: 20px;
+}
+
+.vip-badge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--brand);
+  padding: 0 9px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.market-card-body {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.market-card-body strong {
+  color: #121217;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.market-card-body a {
+  min-height: 38px;
+  color: #25242b;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.market-card-body p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.market-benefits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.market-benefits div {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7ec;
+  border-radius: 16px;
+  background: #fff;
+  padding: 0 14px;
+  color: #25242b;
+  font-weight: 900;
+}
+
+.quick-post {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid #e5e7ec;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.quick-post-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quick-post-grid textarea,
+.quick-post-grid button {
+  grid-column: span 2;
+}
+
+.quick-post-grid textarea {
+  min-height: 80px;
+}
+
+.marketplace-footer {
+  border-top-color: #e5e7ec;
+}
+
+@media (max-width: 1180px) {
+  .market-category-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .market-search-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .market-search-grid button {
+    grid-column: span 3;
+  }
+}
+
+@media (max-width: 900px) {
+  .marketplace-header {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+
+  .header-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .market-card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .market-benefits,
+  .quick-post-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .marketplace-header {
+    display: grid;
+    min-height: auto;
+  }
+
+  .marketplace-header .top-actions {
+    display: flex;
+  }
+
+  .marketplace-header .optional-link {
+    display: none;
+  }
+
+  .market-home {
+    width: min(100% - 16px, 1240px);
+    padding-top: 10px;
+  }
+
+  .market-search {
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .market-search-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .market-search-grid label:first-child,
+  .market-search-grid button {
+    grid-column: 1 / -1;
+  }
+
+  .market-category-grid,
+  .market-card-grid.latest {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .market-card-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .market-card-body strong {
+    font-size: 19px;
+  }
+
+  .market-card-body a {
+    min-height: 34px;
+    font-size: 14px;
+  }
+
+  .market-benefits,
+  .quick-post-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-post-grid textarea,
+  .quick-post-grid button {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .market-category-grid,
+  .market-card-grid,
+  .market-card-grid.latest {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .market-card-media {
+    aspect-ratio: 1.1 / 1;
+  }
+}
+
 /* Marketplace stage 2: denser, more realistic product UI inspired by mature classifieds UX. */
 .search-box {
   position: relative;

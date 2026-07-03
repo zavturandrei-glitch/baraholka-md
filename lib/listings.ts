@@ -40,6 +40,7 @@ type DbListing = {
   condition: Listing["condition"];
   status: ListingStatus;
   created_at: string;
+  updated_at?: string | null;
 };
 
 export const demoListings: Listing[] = [
@@ -55,9 +56,18 @@ export const demoListings: Listing[] = [
 
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
-  try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : fallback; } catch { return fallback; }
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
 }
-function writeJson<T>(key: string, value: T) { if (typeof window !== "undefined") localStorage.setItem(key, JSON.stringify(value)); }
+
+function writeJson<T>(key: string, value: T) {
+  if (typeof window !== "undefined") localStorage.setItem(key, JSON.stringify(value));
+}
+
 function mapDbListing(row: DbListing): Listing {
   return {
     id: row.id,
@@ -78,13 +88,27 @@ function mapDbListing(row: DbListing): Listing {
   };
 }
 
-export function getCategoryName(id: string) { return categories.find((category) => category.id === id)?.name ?? "Категория"; }
-export function getCategoryIcon(id: string) { return categories.find((category) => category.id === id)?.icon ?? "•"; }
-export function getUserListings() { return readJson<Listing[]>(USER_LISTINGS_KEY, []).map((listing) => ({ ...listing, image: listing.image ?? FALLBACK_IMAGE, condition: listing.condition ?? "Б/у" })); }
+export function getCategoryName(id: string) {
+  return categories.find((category) => category.id === id)?.name ?? "Категория";
+}
+
+export function getCategoryIcon(id: string) {
+  return categories.find((category) => category.id === id)?.icon ?? "•";
+}
+
+export function getUserListings() {
+  return readJson<Listing[]>(USER_LISTINGS_KEY, []).map((listing) => ({
+    ...listing,
+    image: listing.image ?? FALLBACK_IMAGE,
+    condition: listing.condition ?? "Б/у"
+  }));
+}
+
 export function getLocalListings() {
   const overrides = readJson<Record<string, ListingStatus>>(STATUS_OVERRIDES_KEY, {});
   return [...getUserListings(), ...demoListings].map((listing) => ({ ...listing, status: overrides[listing.id] ?? listing.status }));
 }
+
 export const getAllListings = getLocalListings;
 
 export async function fetchListings() {
@@ -104,25 +128,26 @@ export async function fetchAdminListings() {
   return (data as DbListing[]).map(mapDbListing);
 }
 
-export async function updateAdminListingStatus(id: string, status: ListingStatus) {
-  if (!isSupabaseConfigured || !supabase) {
+export async function updateAdminListingStatus(id: string, status: ListingStatus, reason?: string, comment?: string) {
+  if (!isSupabaseConfigured || !supabase || id.startsWith("demo-")) {
     setListingStatus(id, status);
     return;
   }
-  if (id.startsWith("demo-")) {
-    setListingStatus(id, status);
-    return;
-  }
+  const { data: existing } = await supabase.from("listings").select("status").eq("id", id).single();
   const { error } = await supabase.from("listings").update({ status }).eq("id", id);
   if (error) throw new Error(`Не удалось изменить статус объявления: ${error.message}`);
+
+  await supabase.from("listing_status_history").insert({
+    listing_id: id,
+    old_status: existing?.status ?? null,
+    new_status: status,
+    reason,
+    comment
+  });
 }
 
 export async function deleteAdminListing(id: string) {
-  if (!isSupabaseConfigured || !supabase) {
-    deleteListing(id);
-    return;
-  }
-  if (id.startsWith("demo-")) {
+  if (!isSupabaseConfigured || !supabase || id.startsWith("demo-")) {
     deleteListing(id);
     return;
   }
@@ -166,7 +191,16 @@ export async function saveListing(input: ListingInput, imageFile?: File | null) 
 
 export function saveUserListing(listing: ListingInput) {
   const id = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Date.now());
-  const newListing: Listing = { ...listing, id, image: FALLBACK_IMAGE, condition: listing.condition ?? "Б/у", date: "Только что", badge: "Новое", status: "На модерации", isUserListing: true };
+  const newListing: Listing = {
+    ...listing,
+    id,
+    image: FALLBACK_IMAGE,
+    condition: listing.condition ?? "Б/у",
+    date: "Только что",
+    badge: "Новое",
+    status: "На модерации",
+    isUserListing: true
+  };
   writeJson(USER_LISTINGS_KEY, [newListing, ...getUserListings()]);
   return newListing;
 }
@@ -176,9 +210,13 @@ export function setListingStatus(id: string, status: ListingStatus) {
   const overrides = readJson<Record<string, ListingStatus>>(STATUS_OVERRIDES_KEY, {});
   writeJson(STATUS_OVERRIDES_KEY, { ...overrides, [id]: status });
 }
+
 export function deleteListing(id: string) {
   writeJson(USER_LISTINGS_KEY, getUserListings().filter((listing) => listing.id !== id));
   const overrides = readJson<Record<string, ListingStatus>>(STATUS_OVERRIDES_KEY, {});
-  writeJson(STATUS_OVERRIDES_KEY, { ...overrides, [id]: "Отклонено" });
+  writeJson(STATUS_OVERRIDES_KEY, { ...overrides, [id]: "Удалено" });
 }
-export function clearUserListings() { writeJson(USER_LISTINGS_KEY, []); }
+
+export function clearUserListings() {
+  writeJson(USER_LISTINGS_KEY, []);
+}
