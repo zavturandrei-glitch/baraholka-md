@@ -36,7 +36,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "transport",
     name: "Транспорт",
-    icon: "🚗",
+    icon: "car",
     description: "Автомобили, велосипеды, запчасти и транспортные услуги по всей Молдове.",
     subcategories: ["Автомобили", "Мото", "Велосипеды", "Запчасти", "Шины и диски", "Автоуслуги"],
     filters: ["Марка", "Год", "Пробег", "Топливо", "Коробка", "Кузов"],
@@ -45,7 +45,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "realty",
     name: "Недвижимость",
-    icon: "🏠",
+    icon: "home",
     description: "Квартиры, дома, комнаты, коммерческие помещения и земля.",
     subcategories: ["Квартиры", "Дома", "Комнаты", "Новостройки", "Коммерческая", "Земля"],
     filters: ["Тип сделки", "Комнат", "Площадь", "Этаж", "Район", "Ремонт"],
@@ -54,7 +54,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "phones",
     name: "Телефоны и гаджеты",
-    icon: "📱",
+    icon: "phone",
     description: "Смартфоны, планшеты, часы, аксессуары и ремонт гаджетов.",
     subcategories: ["Телефоны", "Планшеты", "Смарт-часы", "Аксессуары", "Ремонт"],
     filters: ["Бренд", "Память", "Состояние", "Гарантия", "Комплект"],
@@ -63,7 +63,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "computers",
     name: "Компьютеры и офис",
-    icon: "💻",
+    icon: "laptop",
     description: "Ноутбуки, ПК, мониторы, комплектующие и офисная техника.",
     subcategories: ["Ноутбуки", "Компьютеры", "Мониторы", "Комплектующие", "Принтеры", "Офис"],
     filters: ["Процессор", "RAM", "SSD", "Диагональ", "Состояние"],
@@ -72,7 +72,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "repair",
     name: "Строительство и ремонт",
-    icon: "🔨",
+    icon: "tool",
     description: "Материалы, мастера, ремонт квартир, сантехника и электрика.",
     subcategories: ["Ремонт квартир", "Материалы", "Инструменты", "Сантехника", "Электрика"],
     filters: ["Тип работ", "Выезд", "Опыт", "Гарантия", "Цена за услугу"],
@@ -81,7 +81,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "fashion",
     name: "Одежда и обувь",
-    icon: "👕",
+    icon: "shirt",
     description: "Одежда, обувь, аксессуары и сезонные вещи для всей семьи.",
     subcategories: ["Женская одежда", "Мужская одежда", "Обувь", "Сумки", "Аксессуары"],
     filters: ["Размер", "Бренд", "Сезон", "Состояние", "Цвет"],
@@ -90,8 +90,8 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "home",
     name: "Дом и мебель",
-    icon: "🛋️",
-    description: "Мебель, техника для дома, интерьер, посуда и всё для быта.",
+    icon: "sofa",
+    description: "Мебель, техника для дома, интерьер, посуда и все для быта.",
     subcategories: ["Диваны", "Шкафы", "Кухни", "Бытовая техника", "Посуда", "Декор"],
     filters: ["Материал", "Размер", "Состояние", "Доставка", "Самовывоз"],
     popularQueries: ["диван", "стол", "холодильник", "кухня"]
@@ -99,7 +99,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "jobs",
     name: "Работа",
-    icon: "💼",
+    icon: "briefcase",
     description: "Вакансии, подработка, удаленная работа и предложения для специалистов.",
     subcategories: ["Вакансии", "Подработка", "Удаленная работа", "Резюме", "Стажировки"],
     filters: ["График", "Опыт", "Зарплата", "Город", "Тип занятости"],
@@ -108,7 +108,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "services",
     name: "Услуги",
-    icon: "🧰",
+    icon: "spark",
     description: "Мастера, доставка, обучение, красота, бытовые и бизнес-услуги.",
     subcategories: ["Мастера", "Доставка", "Обучение", "Красота", "IT", "Бизнес"],
     filters: ["Тип услуги", "Выезд", "Отзывы", "Цена", "Город"],
@@ -117,7 +117,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "kids",
     name: "Для детей",
-    icon: "👶",
+    icon: "kids",
     description: "Коляски, игрушки, одежда, мебель и товары для школы.",
     subcategories: ["Коляски", "Игрушки", "Одежда", "Мебель", "Школа", "Автокресла"],
     filters: ["Возраст", "Состояние", "Бренд", "Комплект", "Доставка"],
@@ -126,7 +126,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "pets",
     name: "Животные",
-    icon: "🐶",
+    icon: "paw",
     description: "Питомцы, корм, аксессуары, уход и товары для растений.",
     subcategories: ["Собаки", "Кошки", "Птицы", "Аквариумы", "Корм", "Растения"],
     filters: ["Вид", "Возраст", "Порода", "Документы", "Город"],
@@ -135,7 +135,7 @@ export const catalogCategories: CatalogCategory[] = [
   {
     id: "free",
     name: "Отдам даром",
-    icon: "🎁",
+    icon: "gift",
     description: "Вещи, которые можно забрать бесплатно или обменять.",
     subcategories: ["Мебель", "Одежда", "Техника", "Книги", "Для детей", "Разное"],
     filters: ["Самовывоз", "Состояние", "Город", "Срочно"],

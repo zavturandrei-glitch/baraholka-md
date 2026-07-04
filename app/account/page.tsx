@@ -37,7 +37,7 @@ export default function AccountPage() {
       setListings(allListings.filter((item) => item.isUserListing));
 
       if (!isSupabaseConfigured || !supabase) {
-        setMessage("Supabase env не найден. Кабинет работает в режиме MVP на localStorage.");
+        setMessage("Личный кабинет скоро будет доступен полностью. Пока вы можете просматривать объявления и сохранять избранное на этом устройстве.");
         return;
       }
 
@@ -169,7 +169,7 @@ function AccountPlaceholder({ tab, profile, stats }: { tab: AccountTab; profile:
       <section className="account-panel account-panel-large">
         <h2>Статистика просмотров</h2>
         <div className="account-stat-grid compact">{stats.map((item) => <div key={item.label}><strong>{item.value}</strong><span>{item.label}</span></div>)}</div>
-        <p>На следующем этапе просмотры можно перенести из localStorage в таблицу listing_views.</p>
+        <p>Скоро здесь появится подробная статистика по просмотрам, откликам и избранному.</p>
       </section>
     );
   }
@@ -178,7 +178,7 @@ function AccountPlaceholder({ tab, profile, stats }: { tab: AccountTab; profile:
     return (
       <section className="account-panel account-panel-large">
         <h2>Сообщения</h2>
-        <p>Раздел подготовлен под будущие таблицы conversations и messages. Сейчас контакты продавца доступны на странице объявления.</p>
+        <p>Скоро здесь появятся диалоги между покупателями и продавцами. Сейчас контакты продавца доступны на странице объявления.</p>
       </section>
     );
   }
@@ -199,7 +199,7 @@ function AccountPlaceholder({ tab, profile, stats }: { tab: AccountTab; profile:
   return (
     <section className="account-panel account-panel-large">
       <h2>{labels[tab]}</h2>
-      <p>Раздел уже есть в интерфейсе кабинета. Следующий шаг — добавить отдельные статусы и таблицы для архива, продаж и черновиков.</p>
+      <p>Раздел уже подготовлен в интерфейсе. Скоро здесь появятся отдельные действия и история объявлений.</p>
     </section>
   );
 }

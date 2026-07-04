@@ -169,7 +169,7 @@ export default function AdminPage() {
           <span className="eyebrow">Admin Control Center</span>
           <h1>Модерация и качество Baraholka.md</h1>
           <p>Панель управления объявлениями, жалобами, пользователями и доверием платформы.</p>
-          {!isSupabaseConfigured && <p className="admin-warning">Supabase env не найден — включен localStorage fallback.</p>}
+          {!isSupabaseConfigured && <p className="admin-warning">Часть функций модерации скоро будет доступна полностью. Сейчас можно проверять тестовые объявления.</p>}
         </div>
         <Link className="primary-btn" href="/">Открыть сайт</Link>
       </section>
@@ -293,7 +293,7 @@ export default function AdminPage() {
           {section === "settings" && (
             <section className="admin-table-card">
               <h2>Настройки платформы</h2>
-              <p>Режим MVP: действия работают через Supabase при наличии env, иначе через localStorage fallback.</p>
+              <p>Настройки качества, доверия и модерации платформы. Значения будут расширяться по мере роста продукта.</p>
               <div className="settings-grid">
                 <label>Порог риска<input defaultValue="70%" /></label>
                 <label>Модерация новых объявлений<select defaultValue="on"><option value="on">Включена</option><option value="off">Отключена</option></select></label>
