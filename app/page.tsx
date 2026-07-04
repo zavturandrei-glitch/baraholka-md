@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { categories, fetchListings, getCategoryIcon, getCategoryName, saveListing } from "@/lib/listings";
+import { CategoryIcon } from "@/components/site/CategoryIcon";
+import { categories, fetchListings, getCategoryName, saveListing } from "@/lib/listings";
 import { cityOptions, searchSuggestions } from "@/lib/catalog";
 import { getListingViews, readStringList, saveSearchQuery, SEARCH_HISTORY_KEY } from "@/lib/marketplace";
 import type { Listing } from "@/types/listing";
@@ -120,7 +121,7 @@ export default function HomePage() {
         <div className="market-category-grid">
           {popularCategoryIds.map((id) => (
             <Link className="market-category" key={id} href={`/categories/${id}`}>
-              <span>{getCategoryIcon(id)}</span>
+              <span><CategoryIcon id={id} /></span>
               <strong>{getCategoryName(id)}</strong>
             </Link>
           ))}
@@ -152,10 +153,10 @@ export default function HomePage() {
       </section>
 
       <section className="market-benefits" aria-label="Почему Baraholka.md">
-        <div>✓ Удобный поиск</div>
-        <div>✓ Безопасность</div>
-        <div>✓ Проверенные объявления</div>
-        <div>✓ Бесплатное размещение</div>
+        <div>Удобный поиск</div>
+        <div>Безопасность</div>
+        <div>Проверенные объявления</div>
+        <div>Бесплатное размещение</div>
       </section>
 
       <section className="quick-post" id="post-form">
