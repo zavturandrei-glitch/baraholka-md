@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Header } from "@/components/site/Header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,23 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru">
       <body>
-        <header className="topbar marketplace-header">
-          <a className="brand" href="/" aria-label="Baraholka.md">
-            <span>B</span>
-            <strong>Baraholka.md</strong>
-          </a>
-          <form className="header-search" action="/">
-            <label className="sr-only" htmlFor="header-search-input">Поиск объявлений</label>
-            <input id="header-search-input" name="q" placeholder="Что вы хотите найти?" />
-            <button type="submit" aria-label="Найти">⌕</button>
-          </form>
-          <nav className="top-actions" aria-label="Навигация">
-            <a className="nav-link optional-link" href="/account">Избранное</a>
-            <a className="nav-link optional-link" href="/account">Сообщения</a>
-            <a className="nav-link" href="/login">Войти</a>
-            <a className="post-link" href="/#post-form">Подать объявление</a>
-          </nav>
-        </header>
+        <Header />
         {children}
         <footer className="site-footer marketplace-footer">
           <div>

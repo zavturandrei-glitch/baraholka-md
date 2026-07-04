@@ -2,16 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { fetchListings, getCategoryIcon, getCategoryName } from "@/lib/listings";
+import { Breadcrumbs } from "@/components/listing/Breadcrumbs";
+import { Features } from "@/components/listing/Features";
+import { Gallery } from "@/components/listing/Gallery";
+import { ListingDetails } from "@/components/listing/ListingDetails";
+import { LocationMap } from "@/components/listing/LocationMap";
+import { PriceCard } from "@/components/listing/PriceCard";
+import { RelatedListings } from "@/components/listing/RelatedListings";
+import { SafetyTips } from "@/components/listing/SafetyTips";
+import { SellerCard } from "@/components/listing/SellerCard";
+import { StickyMobileActions } from "@/components/listing/StickyMobileActions";
+import { fetchListings, getCategoryName } from "@/lib/listings";
 import { getListingBrand, getListingImages, getListingViews, readStringList, toggleFavorite, FAVORITES_KEY } from "@/lib/marketplace";
-import { createLocalReport, getQualitySignals, reportReasons } from "@/lib/moderation";
+import { createLocalReport, reportReasons } from "@/lib/moderation";
 import type { Listing } from "@/types/listing";
 
 export default function ListingPage({ params }: { params: { id: string } }) {
   const [listings, setListings] = useState<Listing[]>([]);
   const [phoneShown, setPhoneShown] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState(reportReasons[0]);
   const [reportDetails, setReportDetails] = useState("");
@@ -27,13 +35,13 @@ export default function ListingPage({ params }: { params: { id: string } }) {
 
   const listing = listings.find((item) => item.id === params.id);
   const related = useMemo(
-    () => listing ? listings.filter((item) => item.category === listing.category && item.id !== listing.id).slice(0, 4) : [],
+    () => listing ? listings.filter((item) => item.category === listing.category && item.id !== listing.id).slice(0, 8) : [],
     [listing, listings]
   );
 
   if (!listing) {
     return (
-      <main className="page-narrow">
+      <main className="listing-shell">
         <div className="empty">
           <h1>Объявление не найдено</h1>
           <p>Оно могло быть удалено или очищено из тестовых данных.</p>
@@ -44,20 +52,35 @@ export default function ListingPage({ params }: { params: { id: string } }) {
   }
 
   const currentListing = listing;
-  const images = getListingImages(currentListing);
-  const quality = getQualitySignals(currentListing);
-  const statusClass = currentListing.status === "Активное" ? "status-active" : currentListing.status === "Отклонено" ? "status-rejected" : "status-moderation";
+  const categoryName = getCategoryName(currentListing.category);
   const isFavorite = favoriteIds.includes(currentListing.id);
-  const characteristics = [
-    ["Категория", getCategoryName(currentListing.category)],
+  const images = getListingImages(currentListing);
+  const features: [string, string][] = [
+    ["Категория", categoryName],
     ["Состояние", currentListing.condition],
     ["Бренд", getListingBrand(currentListing)],
     ["Город", currentListing.city],
     ["Дата публикации", currentListing.date],
     ["Обновлено", currentListing.date],
-    ["Статус", currentListing.status],
+    ["ID объявления", currentListing.id.slice(0, 8)],
     ["Просмотры", String(views)]
   ];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: currentListing.title,
+    description: currentListing.description,
+    image: images,
+    category: categoryName,
+    offers: {
+      "@type": "Offer",
+      price: currentListing.price,
+      priceCurrency: "EUR",
+      availability: "https://schema.org/InStock",
+      areaServed: currentListing.city
+    }
+  };
 
   function handleFavorite() {
     setFavoriteIds(toggleFavorite(currentListing.id));
@@ -66,9 +89,8 @@ export default function ListingPage({ params }: { params: { id: string } }) {
 
   async function handleShare() {
     const shareData = { title: currentListing.title, text: `${currentListing.title} - ${currentListing.price} EUR`, url: window.location.href };
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else {
+    if (navigator.share) await navigator.share(shareData);
+    else {
       await navigator.clipboard.writeText(window.location.href);
       setNotice("Ссылка скопирована.");
     }
@@ -78,101 +100,53 @@ export default function ListingPage({ params }: { params: { id: string } }) {
     createLocalReport(currentListing, reportReason, reportDetails);
     setReportOpen(false);
     setReportDetails("");
-    setNotice("Жалоба отправлена модераторам. Спасибо, что помогаете делать площадку безопаснее.");
+    setNotice("Жалоба отправлена модераторам.");
   }
 
   return (
-    <main className="page-narrow">
-      <Link className="back-link" href="/">← Назад к объявлениям</Link>
+    <main className="listing-shell">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <Breadcrumbs categoryName={categoryName} title={currentListing.title} />
       {notice && <p className="admin-notice">{notice}</p>}
 
-      <article className="product-page product-page-pro">
-        <section className="gallery-card product-gallery">
-          <button className="gallery-main" onClick={() => setLightboxOpen(true)} aria-label="Открыть фото на весь экран">
-            <img src={images[selectedImage]} alt={currentListing.title} />
-          </button>
-          <div className="gallery-strip">
-            {images.map((image, index) => (
-              <button className={selectedImage === index ? "active" : ""} key={`${image}-${index}`} onClick={() => setSelectedImage(index)}>
-                <img src={image} alt="" />
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <aside className="product-side contact-panel">
-          <div className="trust-badge">Проверено модератором</div>
-          <span className="category-badge">{getCategoryIcon(currentListing.category)} {getCategoryName(currentListing.category)}</span>
-          <h1>{currentListing.title}</h1>
-          <div className="product-price">{currentListing.price.toLocaleString("ru-RU")} EUR</div>
-          <div className="product-actions">
-            <button onClick={handleFavorite}>{isFavorite ? "В избранном" : "Добавить в избранное"}</button>
-            <button onClick={handleShare}>Поделиться</button>
-            <button onClick={() => setReportOpen(true)}>Пожаловаться</button>
-          </div>
-          <div className="seller-card seller-card-pro">
-            <span>Продавец</span>
-            <strong>{currentListing.seller}</strong>
-            <p>{currentListing.city} · опубликовано {currentListing.date} · {views} просмотров</p>
-            <button className="primary-btn" onClick={() => setPhoneShown(true)}>{phoneShown ? currentListing.phone : "Показать телефон"}</button>
-            <a className="contact-link" href={`mailto:${currentListing.email}`}>Написать на email</a>
-            <span className="messenger-line">{currentListing.messenger}</span>
-          </div>
-        </aside>
-
-        <section className="description-card">
-          <h2>Описание</h2>
-          <p>{currentListing.description}</p>
-        </section>
-
-        <section className="description-card specs-card">
-          <h2>Характеристики</h2>
-          <div className="spec-grid">
-            {characteristics.map(([label, value]) => (
-              <div key={label}>
-                <span>{label}</span>
-                <strong className={label === "Статус" ? `status ${statusClass}` : ""}>{value}</strong>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="description-card safety-card">
-          <h2>Безопасная сделка</h2>
-          <div className="safety-grid">
-            <div><strong>Качество объявления: {quality.score}%</strong><p>Проверяем фото, цену, контакты и полноту описания.</p></div>
-            <div><strong>Не переводите предоплату</strong><p>Встречайтесь в безопасном месте и проверяйте товар до оплаты.</p></div>
-            <div><strong>Сообщайте о подозрениях</strong><p>Жалобы попадают в админку и помогают быстрее убирать рискованные объявления.</p></div>
-          </div>
-        </section>
+      <article className="flagship-listing">
+        <Gallery images={images} title={currentListing.title} />
+        <div className="flagship-side">
+          <PriceCard
+            price={currentListing.price}
+            title={currentListing.title}
+            city={currentListing.city}
+            date={currentListing.date}
+            views={views}
+            id={currentListing.id}
+            condition={currentListing.condition}
+            categoryName={categoryName}
+            isFavorite={isFavorite}
+            onFavorite={handleFavorite}
+            onShare={handleShare}
+          />
+          <SellerCard
+            seller={currentListing.seller}
+            city={currentListing.city}
+            email={currentListing.email}
+            messenger={currentListing.messenger}
+            phone={currentListing.phone}
+            phoneShown={phoneShown}
+            onShowPhone={() => setPhoneShown(true)}
+          />
+          <button className="report-link" onClick={() => setReportOpen(true)}>Пожаловаться на объявление</button>
+        </div>
       </article>
 
-      <section className="section-block">
-        <div className="section-title"><div><span className="eyebrow">Похожие</span><h2>Еще в этой категории</h2></div></div>
-        <div className="related-grid">
-          {related.map((item) => (
-            <Link className="related-card" href={`/listings/${item.id}`} key={item.id}>
-              <img src={item.image} alt={item.title} />
-              <strong>{item.title}</strong>
-              <span>{item.price.toLocaleString("ru-RU")} EUR</span>
-            </Link>
-          ))}
-        </div>
+      <section className="listing-content-grid">
+        <ListingDetails description={currentListing.description} />
+        <Features features={features} />
+        <LocationMap city={currentListing.city} />
+        <SafetyTips />
       </section>
 
-      {lightboxOpen && (
-        <div className="lightbox" role="dialog" aria-modal="true">
-          <button className="lightbox-close" onClick={() => setLightboxOpen(false)}>Закрыть</button>
-          <img src={images[selectedImage]} alt={currentListing.title} />
-          <div className="lightbox-thumbs">
-            {images.map((image, index) => (
-              <button className={selectedImage === index ? "active" : ""} key={`${image}-lightbox-${index}`} onClick={() => setSelectedImage(index)}>
-                <img src={image} alt="" />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <RelatedListings listings={related} />
+      <StickyMobileActions phone={currentListing.phone} phoneShown={phoneShown} onShowPhone={() => setPhoneShown(true)} email={currentListing.email} />
 
       {reportOpen && (
         <div className="admin-modal" role="dialog" aria-modal="true">
